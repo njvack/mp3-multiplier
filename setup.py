@@ -29,6 +29,7 @@ setup(
     entry_points={
         'console_scripts': [
             'mp3mux = mp3mux.scripts.mp3mux_cmd:main',
+            'extract_itunes_playcounts = mp3mux.scripts.extract_itunes_playcounts:main',  # noqa
         ]
     }
 )
