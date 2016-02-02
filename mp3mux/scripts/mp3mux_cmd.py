@@ -24,14 +24,15 @@ Options:
   -v, --verbose          Print extra debugging
 
 The headings of the CSV file must be ID3 tag names -- so "artist", "album",
-"song", "comment", "genre", "year" and/or "track". This is the same set of
-values that can be used by the --filename-fields option; there must not be
-overlap between the CSV headers and filename-fields option.
+"song", "comment", "genre", "year", "track", "total", and/or "description".
+This is the same set of values that can be used by the --filename-fields
+option; there must not be overlap between the CSV headers and filename-fields
+option.
 
 All ID3 tags not specified in either --filename-fields or the CSV headers will
 be stripped.
 
-Requires the id3v2 executable be in PATH.
+Requires the id3tag executable be in PATH.
 """
 
 from __future__ import absolute_import, unicode_literals
@@ -62,14 +63,16 @@ FIELDS = {
     'track': '--track',
     'comment': '--comment',
     'genre': '--genre',
-    'year': '--year'
+    'year': '--year',
+    'total': '--total',
+    'description': '--desc'
 }
 
 
-def id3v2_args(tag_dict):
+def id3tag_args(tag_dict):
     nested = [
-        [FIELDS[fname], val]
-        for fname, val in tag_dict.items()
+        [arg_name, tag_dict.get(field_name, '')]
+        for field_name, arg_name in FIELDS.items()
     ]
     return itertools.chain(*nested)
 
@@ -100,13 +103,9 @@ def single_mux(
         logger.info('{0} -> {1}'.format(mp3_file, target_file))
         if make_changes:
             shutil.copyfile(mp3_file, target_file)
-        cmd_args = ['id3v2', '-D', target_file]
-        logger.info(' '.join(cmd_args))
-        if make_changes:
-            subprocess.check_call(cmd_args, stdout=devnull)
         id3_map = part_dict.copy()
         id3_map.update(line)
-        cmd_args = ['id3v2'] + list(id3v2_args(id3_map)) + [target_file]
+        cmd_args = ['id3tag'] + list(id3tag_args(id3_map)) + [target_file]
         logger.info(' '.join(cmd_args))
         if make_changes:
             subprocess.check_call(cmd_args, stdout=devnull)
